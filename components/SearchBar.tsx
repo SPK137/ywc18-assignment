@@ -16,7 +16,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { ReactText, useRef, useState } from "react";
 
 export const PositionIcon = (props) => (
   <Icon viewBox="0 0 24 24" {...props}>
@@ -44,10 +44,24 @@ export const getIcon = (province) => {
   else return <></>;
 };
 
-const SearchField: React.FC<{ provinces: string[]; selectedProvinceIndex: number }> = ({
+const SearchField: React.FC<{
+  provinces: string[];
+  shopTypeIndex: number;
+  shopTypes: string[];
+  selectedProvinceIndex: number;
+  setKeyword: (nextValue: ReactText) => void;
+  setShopType: (nextValue: ReactText) => void;
+  setProvince: (nextValue: ReactText) => void;
+}> = ({
   provinces,
+  shopTypeIndex,
+  shopTypes,
   selectedProvinceIndex,
+  setKeyword,
+  setProvince,
+  setShopType,
 }) => {
+  const [internalKeyword, setInternalKeyword] = useState<string>("");
   return (
     <Flex flex={1} flexDir="column" maxWidth={["100%", "1040px"]}>
       <InputGroup fontFamily="IBMPlexSansThai">
@@ -72,15 +86,14 @@ const SearchField: React.FC<{ provinces: string[]; selectedProvinceIndex: number
               >
                 {provinces[selectedProvinceIndex]}
               </MenuButton>
-              <MenuList
-                borderRadius="0px"
-                maxWidth="80px !important"
-                overflowY="scroll"
-                maxH="280px"
-                fontSize="14px"
-              >
-                {provinces.map((province) => (
-                  <MenuItem maxW="80px" key={`searchBar-${province}`}>
+              <MenuList borderRadius="0px" overflowY="scroll" maxH="280px" fontSize="14px">
+                {provinces.map((province, index) => (
+                  <MenuItem
+                    key={`searchBar-${province}`}
+                    onClick={() => {
+                      setProvince(index);
+                    }}
+                  >
                     {getIcon(province)} {province}
                   </MenuItem>
                 ))}
@@ -88,36 +101,67 @@ const SearchField: React.FC<{ provinces: string[]; selectedProvinceIndex: number
             </Menu>
           }
         />
-        <Input
-          fontFamily="IBMPlexSansThai"
-          fontSize="14px"
-          placeholder="ค้นหา ชื่อ ร้านอาหาร และเครื่องดื่ม ร้านธงฟ้า ร้านค้า OTOP และสินค้าทั่วไป"
-        />
-        <InputRightAddon
-          width="60px"
-          maxW="60px"
-          justifyContent="center"
-          p="0px"
-          children={
-            <IconButton
-              background="gray.50"
-              flex={1}
-              height="100%"
-              p="0px"
-              border="0px"
-              aria-label="Search"
-              icon={<SearchIcon fontSize="12px" />}
-            ></IconButton>
-          }
-        />
+        <Menu>
+          <Input
+            fontFamily="IBMPlexSansThai"
+            fontSize="14px"
+            placeholder="ค้นหา ชื่อ ร้านอาหาร และเครื่องดื่ม ร้านธงฟ้า ร้านค้า OTOP และสินค้าทั่วไป"
+            onChange={(event) => setInternalKeyword(event.target.value)}
+          />
+          <InputRightAddon
+            width="60px"
+            maxW="60px"
+            justifyContent="center"
+            p="0px"
+            children={
+              <IconButton
+                background="gray.50"
+                flex={1}
+                height="100%"
+                p="0px"
+                border="0px"
+                aria-label="Search"
+                onClick={() => setKeyword(internalKeyword)}
+                icon={<SearchIcon fontSize="12px" />}
+              ></IconButton>
+            }
+          />
+          {/* <MenuList borderRadius="0px" overflowY="scroll" maxH="280px" fontSize="14px">
+            {shopTypes.map((province, index) => (
+              <MenuItem
+                key={`searchBar-${province}`}
+                onClick={() => {
+                  setProvince(index);
+                }}
+              >
+                {getIcon(province)} {province}
+              </MenuItem>
+            ))}
+          </MenuList> */}
+        </Menu>
       </InputGroup>
     </Flex>
   );
 };
 
-const SearchBar: React.FC<{ provinces: string[]; selectedProvinceIndex: number }> = ({
+const SearchBar: React.FC<{
+  shopTypeIndex: number;
+  shopTypes: string[];
+  provinces: string[];
+  selectedProvinceIndex: number;
+  onOpen: () => void;
+  setKeyword: (nextValue: ReactText) => void;
+  setShopType: (nextValue: ReactText) => void;
+  setProvince: (nextValue: ReactText) => void;
+}> = ({
+  shopTypeIndex,
+  shopTypes,
   provinces,
   selectedProvinceIndex,
+  setKeyword,
+  setProvince,
+  setShopType,
+  onOpen,
 }) => {
   return (
     <Box>
@@ -144,8 +188,21 @@ const SearchBar: React.FC<{ provinces: string[]; selectedProvinceIndex: number }
             display={["flex", "none", "none"]}
           />
         </Link>
-        <SearchField provinces={provinces} selectedProvinceIndex={selectedProvinceIndex} />
-        <Button background="transparent" p="0px" display={["inherit", "none", "none"]}>
+        <SearchField
+          setKeyword={setKeyword}
+          shopTypes={shopTypes}
+          shopTypeIndex={shopTypeIndex}
+          setShopType={setShopType}
+          provinces={provinces}
+          selectedProvinceIndex={selectedProvinceIndex}
+          setProvince={setProvince}
+        />
+        <Button
+          background="transparent"
+          p="0px"
+          display={["inherit", "none", "none"]}
+          onClick={onOpen}
+        >
           <Image src="/images/filter.png" w="19px" h="19px" />
         </Button>
       </Flex>
@@ -156,7 +213,7 @@ const SearchBar: React.FC<{ provinces: string[]; selectedProvinceIndex: number }
         color="#fff"
         px="10%"
         alignItems="center"
-        w="100vw"
+        w="100%"
       >
         <Link href="https://search-merchant.คนละครึ่ง.com">
           <Text as="button" fontFamily="IBMPlexSansThai" fontSize="14px" textDecoration="underline">

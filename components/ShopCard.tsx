@@ -22,8 +22,8 @@ const FacilityIcon: React.FC<{ name: string }> = ({ name }) => {
   );
 };
 
-const ShopTag: React.FC<{ shopOpen?: boolean }> = ({ shopOpen }) => {
-  if (shopOpen)
+const ShopTag: React.FC<{ shopOpen?: string }> = ({ shopOpen }) => {
+  if (shopOpen === "Y")
     return (
       <Flex
         background="green.400"
@@ -41,7 +41,7 @@ const ShopTag: React.FC<{ shopOpen?: boolean }> = ({ shopOpen }) => {
         เปิดอยู่
       </Flex>
     );
-  else
+  else if (shopOpen === "N")
     return (
       <Flex
         background="gray.400"
@@ -59,11 +59,28 @@ const ShopTag: React.FC<{ shopOpen?: boolean }> = ({ shopOpen }) => {
         ปิดแล้ว
       </Flex>
     );
+  else return <></>;
 };
 
 const ShopCard: React.FC<{ merchantData: Merchant }> = ({ merchantData, ...props }) => {
   const [isLoading, setLoading] = useState<boolean>(false);
   const parsedHighlightText = parse(merchantData.highlightText);
+
+  const generatePriceLevel = () => {
+    const priceString = [];
+    for (let x = 1; x <= 4; x++)
+      priceString.push(
+        <Text
+          fontFamily="IBMPlexSansThai"
+          fontSize="14px"
+          fontWeight="400"
+          color={merchantData.priceLevel >= x ? "#000" : "gray.400"}
+        >
+          ฿
+        </Text>
+      );
+    return priceString;
+  };
 
   return (
     <Flex
@@ -84,11 +101,11 @@ const ShopCard: React.FC<{ merchantData: Merchant }> = ({ merchantData, ...props
         w={["100%", "100%", "240px"]}
       />
       <Flex flexDir="column" w="100%" px="20px">
-        <Flex alignItems="center" minH="40px" paddingTop="14px">
+        <Flex alignItems="center" minH="40px" paddingTop="10px">
           <Text fontFamily="IBMPlexSansThai" fontSize="20px" fontWeight="700" marginRight="10px">
             {merchantData.shopNameTH}
           </Text>
-          <ShopTag shopOpen={merchantData.isOpen === "Y"} />
+          <ShopTag shopOpen={merchantData.isOpen} />
         </Flex>
         <Flex marginTop="5px" flexWrap="wrap">
           <Text fontFamily="IBMPlexSansThai" fontSize="14px" fontWeight="400" color="gray.400">
@@ -103,9 +120,7 @@ const ShopCard: React.FC<{ merchantData: Merchant }> = ({ merchantData, ...props
           >
             |
           </Text>
-          <Text fontFamily="IBMPlexSansThai" fontSize="14px" fontWeight="400" color="gray.400">
-            {`฿฿฿฿`}
-          </Text>
+          <Flex>{generatePriceLevel()}</Flex>
           <Text
             fontFamily="IBMPlexSansThai"
             fontSize="14px"
